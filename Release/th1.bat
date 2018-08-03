@@ -1,11 +1,13 @@
 @echo off
-%1start /b "" "%~dp0cmd.exe" "/c %~fs0 :"&exit
-setlocal EnableDelayedExpansion
-set msg=hello
+set image=size cmd
+if "%image%"=="size cmd" "%~dp0cmd.exe" /c "%~f0"&goto:eof
+
+set msg=hello th2
 set image=setvar msg
-:loop
-set /a color=(color+1)%%256
-set image=buffer buf 100 100 0 0 !color!
-set image=draw buf 0 0
-set image=sleep 10
-goto loop
+for /l %%# in () do (
+	for /l %%c in (0,1,255) do (
+		set image=buffer buf 100 100 0 0 %%c
+		set image=draw buf 0 0
+		set image=sleep 10
+	)
+)

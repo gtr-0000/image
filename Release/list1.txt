@@ -1,0 +1,8 @@
+resize cmd 1000 1000
+font 0 255 255 50 100
+load bin bin.png
+list list2.txt
+rotate bin 45
+save bin newbin2.jpg
+draw newbin2.jpg 0 0
+test ÄãºÃ 200 500
