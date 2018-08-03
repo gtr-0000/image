@@ -14,15 +14,14 @@ image
 #pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "Winmm.lib")
 #endif
-#include <cstdio>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <string>
-#include <wchar.h>
-#include <process.h>
 #include <windows.h>
 #include <gdiplus.h>
+#include <wchar.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdio>
+#include <map>
 
 #include "regionmgr.hpp"
 #include "keydef.hpp"
@@ -30,13 +29,13 @@ image
 using namespace std;
 using namespace Gdiplus;
 
-#define KEYDOWN(vk_code)	((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
-#define DLL_EXPORT		__declspec(dllexport)
-#define wtoi			_wtoi
-#define wcsicmp			_wcsicmp
-#define wcsnicmp		_wcsnicmp
-#define match(x, y)		((x) < argc && !wcsnicmp(argv[x], (y), wcslen(argv[x])))
-#define matchExt(x, y)		(!wcsicmp(&argv[x][wcslen(argv[x]) - 4], (y)))
+#define WM_GETMSG	(WM_USER + 100)
+#define DLL_EXPORT	__declspec(dllexport)
+#define wtoi		_wtoi
+#define wcsicmp		_wcsicmp
+#define wcsnicmp	_wcsnicmp
+#define match(x, y)	((x) < argc && !wcsnicmp(argv[x], (y), wcslen(argv[x])))
+#define matchExt(x, y)	(!wcsicmp(&argv[x][wcslen(argv[x]) - 4], (y)))
 
 enum imageType
 {			//imageresµÄÀàÐÍ
@@ -1152,7 +1151,7 @@ void image(const wchar_t *CmdLine)
 		SetConsoleMode(hIn, oldConMode);
 	}
 
-	if(match(0, L"picquery")||match(0,L"picatom"))
+	if(match(0, L"picquery") || match(0, L"picatom"))
 	{
 		wstring ret = getres(argv[1])->regTree.query(wtoi(argv[2]), wtoi(argv[3]));
 		SetEnvironmentVariableW(L"image", ret.c_str());
