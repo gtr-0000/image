@@ -24,10 +24,9 @@ set box.wm=
 set x=0
 set y=0
 :loop
+set image=getmsg box box.wm
 if not "!box.wm!"==" " (
-	set wm=!box.wm!
-	set box.wm= 
-	for %%a in (!wm!) do (
+	for %%a in (!box.wm!) do (
 		ECHO %%a
 		for /f "tokens=1,2,3 delims=." %%b in ("%%a") do (
 			if "%%b"=="MouseMove" (
@@ -40,12 +39,10 @@ if not "!box.wm!"==" " (
 				if "%%c"=="Right" set image=pen 255 0 0
 			)
 			if "%%b"=="MouseUp" set image=pen 0 255 0
-
-			if "%%b"=="Close" goto :eof
+			if "%%b"=="Close" pause&goto :eof
 		)
 	)
 )
-::ç¼“è§£CPU
+::»º½âCPU
 set image=sleep 16
 goto loop
-pause

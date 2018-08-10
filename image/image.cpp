@@ -14,6 +14,7 @@ image
 #pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "Winmm.lib")
 #endif
+#include <process.h>
 #include <windows.h>
 #include <gdiplus.h>
 #include <wchar.h>
@@ -22,7 +23,6 @@ image
 #include <string>
 #include <cstdio>
 #include <map>
-
 #include "regionmgr.hpp"
 #include "keydef.hpp"
 
@@ -48,6 +48,7 @@ struct imageres;	//画布结构体
 struct wndInfo		//窗口信息结构体
 {
 	wstring		tag;
+	wstring		info;
 	imageres	*hRes;
 	HDC		hdc;
 };
@@ -61,14 +62,33 @@ void			image(const wchar_t *);
 GdiplusStartupInput	gdiplusStartupInput;
 ULONG_PTR		gdiplusToken;
 
+void			Init_image();
+void			Stop_image();
+
+bool WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpvReserved)
+{
+	switch(dwReason)
+	{
+	case DLL_PROCESS_ATTACH:
+		//HookAPI(SetEnvironmentVariableW, SetCall_image);
+		DisableThreadLibraryCalls(hModule);
+		Init_image();
+		break;
+
+	case DLL_PROCESS_DETACH:
+		Stop_image();
+		break;
+	}
+
+	return true;
+}
+
 extern "C" DLL_EXPORT int WINAPI Init(void)	//随便给个导出函数,方便加载
 {
 	return 0;
 }
 
-extern "C"
-__declspec(dllexport)
-void call(wchar_t *varName, wchar_t *varValue)
+extern "C" DLL_EXPORT void call(const wchar_t *varName, const wchar_t *varValue)
 {
 	//判断变量名是否为image, 是则调用image
 	if(!wcsicmp(varName, L"image")) image(varValue);
@@ -87,29 +107,29 @@ struct imageres
 
 	inline imageres()
 	{
-		hwnd	= nullptr;
-		hdc = nullptr;
-		bmp = oldbmp = nullptr;
+		hwnd	= NULL;
+		hdc = NULL;
+		bmp = oldbmp = NULL;
 		w = h = 0;
 		type = irBuffer;
 	}
 
 	inline imageres(const wchar_t *file)
 	{
-		hwnd = nullptr;
+		hwnd = NULL;
 		type = irBuffer;
 		if(!loadFile(file))
 		{
-			hdc = nullptr;
-			bmp = oldbmp = nullptr;
+			hdc = NULL;
+			bmp = oldbmp = NULL;
 			w = h = 0;
 		}
 	}
 
 	imageres (int iw, int ih)		//根据大小初始化
 	{
-		hwnd = nullptr;
-		hdc = CreateCompatibleDC(nullptr);
+		hwnd = NULL;
+		hdc = CreateCompatibleDC(NULL);
 		bmp = CreateCompatibleBitmap(hTarget->hdc, iw, ih);
 		oldbmp = (HBITMAP) SelectObject(hdc, bmp);
 		w = iw;
@@ -121,7 +141,7 @@ struct imageres
 		this->free();
 
 		//Support: BMP, GIF, EXIF, JPG, PNG and TIFF
-		//bmp = (HBITMAP)LoadImageA(nullptr, file, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+		//bmp = (HBITMAP)LoadImageA(NULL, file, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 		Bitmap	*bm = new Bitmap(file);
 		bm->GetHBITMAP(0, &bmp);
 
@@ -129,7 +149,7 @@ struct imageres
 		delete bm;
 
 		//为了防止多个hbmp同时用一个hdc发生冲突，所以这里给所有的hbmp分配各自的hdc
-		hdc = CreateCompatibleDC(nullptr);
+		hdc = CreateCompatibleDC(NULL);
 		oldbmp = (HBITMAP) SelectObject(hdc, bmp);
 
 		BITMAP	bi;
@@ -142,7 +162,7 @@ struct imageres
 
 	void resize(int iw, int ih)
 	{
-		HDC	nhdc = CreateCompatibleDC(nullptr);
+		HDC	nhdc = CreateCompatibleDC(NULL);
 		HBITMAP nbmp = CreateCompatibleBitmap(hTarget->hdc, iw, ih);
 
 		DeleteObject(oldbmp);
@@ -157,7 +177,7 @@ struct imageres
 		h = ih;
 
 		//如果有窗口,则要改变窗口大小!
-		if(hwnd != nullptr)
+		if(hwnd != NULL)
 		{
 			RECT	rc, rc2;
 			GetClientRect(hwnd, &rc);
@@ -168,7 +188,7 @@ struct imageres
 
 			MoveWindow(hwnd, rc2.left, rc2.top, w, h, 0);
 
-			InvalidateRect(hwnd, nullptr, true);
+			InvalidateRect(hwnd, NULL, true);
 		}
 	}
 
@@ -184,7 +204,7 @@ struct imageres
 			break;
 
 		case irBuffer:
-			if(hwnd != nullptr) PostMessage(hwnd, WM_CLOSE, 0, 0);
+			if(hwnd != NULL) PostMessage(hwnd, WM_CLOSE, 0, 0);
 			SelectObject(hdc, oldbmp);
 			DeleteObject(bmp);
 			DeleteDC(hdc);
@@ -230,14 +250,14 @@ void Init_image()
 {
 	initkeydef();
 
-	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	//获取cmd大小以及绘图句柄
 	hCMD = GetConsoleWindow();
 
 	DEVMODE dm;
 	dm.dmSize = sizeof(DEVMODE);
-	EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm);
 
 	int	ax = dm.dmPelsWidth;
 	int	bx = GetSystemMetrics(SM_CXSCREEN);
@@ -255,10 +275,10 @@ void Init_image()
 
 	resmap[L"cmd"] = res;		//把cmd添加到画布映射表中
 	hTarget = &resmap[L"cmd"];	//绘图默认指向cmd
-	hOldTarget = nullptr;
+	hOldTarget = NULL;
 
 	//获取desktop大小以及绘图句柄
-	res.hdc = GetDC(nullptr);
+	res.hdc = GetDC(NULL);
 	res.w = dm.dmPelsWidth;
 	res.h = dm.dmPelsHeight;
 	res.type = irDesktop;
@@ -328,14 +348,14 @@ void rotateres(wchar_t **argv)
 	Rect		rect(0, 0, hRes->w, hRes->h);
 
 	//用于加载旧位图
-	Bitmap		bitmap(hSrc, nullptr);
+	Bitmap		bitmap(hSrc, NULL);
 	BitmapData	bitmapData;
 	bitmap.LockBits(&rect, ImageLockModeRead, PixelFormat24bppRGB, &bitmapData);
 
 	byte		*pixels = (byte *) bitmapData.Scan0;
 
 	//用于加载新位图
-	Bitmap		bitmap2(hSrc, nullptr);
+	Bitmap		bitmap2(hSrc, NULL);
 	BitmapData	bitmapData2;
 	bitmap2.LockBits(&rect, ImageLockModeWrite, PixelFormat24bppRGB, &bitmapData2);
 
@@ -390,7 +410,7 @@ void alphares(wchar_t **argv)
 	imageres	*hRes = getres(argv[1]);
 	HBITMAP		hSrc = copyhbitmap(hRes);
 	Rect		rect(0, 0, hRes->w, hRes->h);
-	Bitmap		bitmap(hSrc, nullptr);
+	Bitmap		bitmap(hSrc, NULL);
 	BitmapData	bitmapData;
 	bitmap.LockBits(&rect, ImageLockModeRead, PixelFormat24bppRGB, &bitmapData);
 
@@ -400,7 +420,7 @@ void alphares(wchar_t **argv)
 	//不能SelectObject获取cmd等特殊画布的hbitmap，所以要复制一份出来，注意使用之后要DeleteObject
 	HBITMAP		hSrc2 = copyhbitmap(hTarget);
 	Rect		rect2(0, 0, hTarget->w, hTarget->h);
-	Bitmap		bitmap2(hSrc2, nullptr);
+	Bitmap		bitmap2(hSrc2, NULL);
 	BitmapData	bitmapData2;
 	bitmap2.LockBits(&rect2, ImageLockModeRead, PixelFormat24bppRGB, &bitmapData2);
 
@@ -408,7 +428,7 @@ void alphares(wchar_t **argv)
 
 	//用于加载新位图
 	Rect		rect3(0, 0, hTarget->w, hTarget->h);
-	Bitmap		bitmap3(hSrc2, nullptr);
+	Bitmap		bitmap3(hSrc2, NULL);
 	BitmapData	bitmapData3;
 	bitmap3.LockBits(&rect3, ImageLockModeWrite, PixelFormat24bppRGB, &bitmapData3);
 
@@ -467,14 +487,23 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	wndInfo		&winfo = wndmap[hwnd];
 
 	wstring		&windowtag = winfo.tag;
+	wstring		&info = winfo.info;
 	imageres	*hRes = winfo.hRes;
 	HDC		windowhdc = winfo.hdc;
 
-	wchar_t		ret[10000];
+	wchar_t		ret[10000] = L"";
 	const wchar_t	*msgName;
 	const wchar_t	*keyName;
+
 	switch(uMsg)
 	{
+	case WM_GETMSG:
+		{
+			SetEnvironmentVariableW((const wchar_t *) wParam, info.c_str());
+			info = wstring(L"");
+			return 0;
+		}
+
 	case WM_KEYDOWN:
 		msgName = L"KeyDown";
 		goto KeyEvent;
@@ -487,12 +516,12 @@ KeyEvent:
 		{
 			if(('0' <= wParam && wParam <= '9') || ('A' <= wParam && wParam <= 'Z'))
 			{
-				wsprintfW(ret, L" %s.VK_%c.%d", msgName, wParam, wParam);
+				wsprintfW(ret, L" %s.VK_%c.%ud", msgName, wParam, wParam);
 			}
 			else
 			{
 				keyName = keymap.count(wParam) ? keymap[wParam] : L"0";
-				wsprintfW(ret, L" %s.%s.%d", msgName, keyName, wParam);
+				wsprintfW(ret, L" %s.%s.%ud", msgName, keyName, wParam);
 			}
 			break;
 		}
@@ -571,17 +600,10 @@ MouseEvent:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
-	wstring varname(windowtag);
-	varname += L".wm";
+	info += ret;
 
-	wchar_t info[10000];
-	GetEnvironmentVariableW(varname.c_str(), info, sizeof(info));
-	wcscat(info, ret);
+	if(info.length() >= 8192) info = info.substr(0, 8191);
 
-	if(wcslen(ret) > 8192)
-		SetEnvironmentVariableW(varname.c_str(), &info[wcslen(ret) - 8192]);
-	else
-		SetEnvironmentVariableW(varname.c_str(), info);
 	return 0;
 }
 
@@ -656,7 +678,7 @@ unsigned int __stdcall makeWindow(void *args)
 	// wprintf(L"`%s' is closed.\n", tag.c_str());
 	ReleaseDC(hwnd, winfo.hdc);
 	wndmap.erase(hwnd);
-	hRes->hwnd = nullptr;
+	hRes->hwnd = NULL;
 
 	delete args;
 	return 0;
@@ -731,7 +753,7 @@ void image(const wchar_t *CmdLine)
 		imageres	*hRes = getres(argv[1]);
 		HBITMAP		hSrc = copyhbitmap(hRes);
 		Rect		rect(0, 0, hRes->w, hRes->h);
-		Bitmap		bitmap(hSrc, nullptr);
+		Bitmap		bitmap(hSrc, NULL);
 
 		//https://stackoverflow.com/questions/1584202/gdi-bitmap-save-problem
 		CLSID		Clsid;
@@ -739,7 +761,7 @@ void image(const wchar_t *CmdLine)
 		if(matchExt(2, L".jpg")) GetEncoderClsid(L"image/jpeg", &Clsid);
 		if(matchExt(2, L".png")) GetEncoderClsid(L"image/png", &Clsid);
 		if(matchExt(2, L".gif")) GetEncoderClsid(L"image/gif", &Clsid);
-		bitmap.Save(argv[2], &Clsid, nullptr);
+		bitmap.Save(argv[2], &Clsid, NULL);
 		DeleteObject(hSrc);
 	}
 
@@ -818,7 +840,7 @@ void image(const wchar_t *CmdLine)
 	{
 		imageres	*hRes = getres(argv[1]);
 		if(hRes->type == irCMD) ShowWindow(hRes->hwnd, SW_SHOW);
-		if(hRes->type == irBuffer && hRes->hwnd == nullptr)
+		if(hRes->type == irBuffer && hRes->hwnd == NULL)
 		{
 			wstring *arg = new wstring(argv[1]);
 
@@ -832,6 +854,15 @@ void image(const wchar_t *CmdLine)
 		imageres	*hRes = &resmap[argv[1]];
 		if(hRes->type == irCMD) ShowWindow(hRes->hwnd, SW_HIDE);
 		if(hRes->type == irBuffer) PostMessage(hRes->hwnd, WM_CLOSE, 0, 0);
+	}
+
+	if(match(0, L"getmsg"))
+	{
+		imageres	*hRes = getres(argv[1]);
+		if(hRes->hwnd != NULL)
+			SendMessageW(hRes->hwnd, WM_GETMSG, (WPARAM) argv[2], 0);
+		else
+			SetEnvironmentVariableW(argv[2], L" Close");
 	}
 
 	//像素操作
@@ -956,7 +987,7 @@ void image(const wchar_t *CmdLine)
 
 	if(match(0, L"line"))
 	{
-		MoveToEx(hTarget->hdc, wtoi(argv[1]), wtoi(argv[2]), nullptr);
+		MoveToEx(hTarget->hdc, wtoi(argv[1]), wtoi(argv[2]), NULL);
 		LineTo(hTarget->hdc, wtoi(argv[3]), wtoi(argv[4]));
 	}
 
@@ -985,7 +1016,7 @@ void image(const wchar_t *CmdLine)
 	{
 		//清屏并重置cmd图层的图元索引树
 		resmap[L"cmd"].regioninit((wchar_t *) L"cmd");
-		InvalidateRect(hCMD, nullptr, true);
+		InvalidateRect(hCMD, NULL, true);
 	}
 
 	if(match(0, L"setvar"))
@@ -1024,7 +1055,7 @@ void image(const wchar_t *CmdLine)
 		//获取cmd大小以及绘图句柄
 		DEVMODE dm;
 		dm.dmSize = sizeof(DEVMODE);
-		EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+		EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm);
 
 		int		ax = dm.dmPelsWidth;
 		int		bx = GetSystemMetrics(SM_CXSCREEN);
@@ -1115,37 +1146,30 @@ void image(const wchar_t *CmdLine)
 			Sleep(1);
 		}
 
-		if(x == -1)
+		if(argc >= 3)
 		{
-			SetEnvironmentVariableW(L"image", L"TimeOut");
+			//在指定的region列表中查找
+			int	ret = 0;
+			for(int i = 2; i < argc; i++)
+			{
+				int	x1, y1, x2, y2;
+				swscanf(argv[i], L"%d,%d,%d,%d", &x1, &y1, &x2, &y2);
+				if(x >= x1 && x <= x2 && y >= y1 && y <= y2) ret = i - 1;
+			}
+
+			swprintf(info, L"%d %d %d", x, y, ret);
+			SetEnvironmentVariableW(L"image", info);
+			swprintf(info, L"%d", ret);
+			SetEnvironmentVariableW(L"imagepic", info);
 		}
 		else
 		{
-			if(argc >= 3)
-			{
-				//在指定的region列表中查找
-				int	ret = 0;
-				for(int i = 2; i < argc; i++)
-				{
-					int	x1, y1, x2, y2;
-					swscanf(argv[i], L"%d,%d,%d,%d", &x1, &y1, &x2, &y2);
-					if(x >= x1 && x <= x2 && y >= y1 && y <= y2) ret = i - 1;
-				}
-
-				swprintf(info, L"%d %d %d", x, y, ret);
-				SetEnvironmentVariableW(L"image", info);
-				swprintf(info, L"%d", ret);
-				SetEnvironmentVariableW(L"imagepic", info);
-			}
-			else
-			{
-				//在图元索引表中查找
-				wstring ret;
-				ret = resmap[L"cmd"].regTree.query(x, y);
-				swprintf(info, L"%d %d %s", x, y, ret.c_str());
-				SetEnvironmentVariableW(L"image", info);
-				SetEnvironmentVariableW(L"imagepic", ret.c_str());
-			}
+			//在图元索引表中查找
+			wstring ret;
+			ret = resmap[L"cmd"].regTree.query(x, y);
+			swprintf(info, L"%d %d %s", x, y, ret.c_str());
+			SetEnvironmentVariableW(L"image", info);
+			SetEnvironmentVariableW(L"imagepic", ret.c_str());
 		}
 
 		SetConsoleMode(hIn, oldConMode);
@@ -1190,31 +1214,13 @@ void image(const wchar_t *CmdLine)
 		}
 	}
 
-	if(hTarget->type == irBuffer && hTarget->hwnd != nullptr) InvalidateRect(hTarget->hwnd, nullptr, true);
-	if(hOldTarget != nullptr)
+	if(hTarget->type == irBuffer && hTarget->hwnd != NULL) InvalidateRect(hTarget->hwnd, NULL, true);
+	if(hOldTarget != NULL)
 	{
 		hTarget = hOldTarget;
-		hOldTarget = nullptr;
+		hOldTarget = NULL;
 	}
 
 	LocalFree(argv);
 	return;
-}
-
-bool WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpvReserved)
-{
-	switch(dwReason)
-	{
-	case DLL_PROCESS_ATTACH:
-		//HookAPI(SetEnvironmentVariableW, SetCall_image);
-		DisableThreadLibraryCalls(hModule);
-		Init_image();
-		break;
-
-	case DLL_PROCESS_DETACH:
-		Stop_image();
-		break;
-	}
-
-	return true;
 }
