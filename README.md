@@ -53,13 +53,13 @@ image3模块核心
 # 调用方法
 --------
 
-## 1 基础调用
+### 1 基础调用
 
 通过命令 Set image=&lt;Command&gt; \[argv1 argv2 \... \...
 
 例如: Set image=load Pic1 example.bmp
 
-## 2 复古调用
+### 2 复古调用
 
 新建image.bat, 内容:
 
@@ -77,10 +77,10 @@ image \[argv1 argv2 \... \...
 # 基础命令
 --------
 
-## 0 help
+### 0 help
 显示帮助
 
-## 1 buffer/*newBuf*
+### 1 buffer/*newBuf*
 
 **语法:buffer &lt;tag&gt; \[width height\] \[r g b\]**
 
@@ -92,7 +92,7 @@ image \[argv1 argv2 \... \...
 
 作用:新建名为&lt;tag&gt;画布,并初始化画布上的图元
 
-## 2 load
+### 2 load
 
 **语法:load &lt;tag&gt; &lt;file&gt;**
 
@@ -104,7 +104,7 @@ image \[argv1 argv2 \... \...
 
 注意:image没有容错处理,因此必须保证&lt;file&gt;存在且有效!
 
-## 3 save
+### 3 save
 
 **语法: save &lt;tag&gt; &lt;file&gt;**
 
@@ -114,7 +114,7 @@ image \[argv1 argv2 \... \...
 
 作用保存画布&lt;tag&gt;的内容到文件&lt;file&gt;
 
-## 4 unload/*delBuf
+### 4 unload/*delBuf*
 
 **语法:unload &lt;tag&gt;**
 
