@@ -66,6 +66,22 @@ public:
 			add(region(ri->x1 + x0, ri->y1 + y0, ri->x2 + x0, ri->y2 + y0, ri->name));
 	}
 
+	void sizeCut(int w, int h)
+	{
+		for(list<region>::iterator ri = regs.begin(); ri != regs.end();)
+		{
+			ri->x1 = toRange(ri->x1, 0, w);
+			ri->x2 = toRange(ri->x2, 0, w);
+			ri->y1 = toRange(ri->y1, 0, h);
+			ri->y2 = toRange(ri->y2, 0, h);
+
+			if(ri->x1 == ri->x2 || ri->y1 == ri->y2)
+				regs.erase(ri++);
+			else
+				++ri;
+		}
+	}
+
 	void clear()
 	{
 		for(list<region>::iterator ri = regs.begin(); ri != regs.end();) regs.erase(ri++);

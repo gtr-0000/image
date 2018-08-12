@@ -886,6 +886,8 @@ void image(const wchar_t *CmdLine)
 		imageres	*hRes = getres(argv[1]);
 
 		hTarget->regTree.add(hRes->regTree, wtoi(argv[2]), wtoi(argv[3]));
+		hTarget->regTree.sizeCut(hTarget->w, hTarget->h);
+
 		if(argc == 4)
 		{
 			BitBlt(hTarget->hdc, wtoi(argv[2]), wtoi(argv[3]), hRes->w, hRes->h, hRes->hdc, 0, 0, SRCCOPY);
@@ -1175,7 +1177,7 @@ void image(const wchar_t *CmdLine)
 		SetConsoleMode(hIn, oldConMode);
 	}
 
-	if(match(0, L"picquery") || match(0, L"picatom"))
+	if(match(0, L"picatom"))
 	{
 		wstring ret = getres(argv[1])->regTree.query(wtoi(argv[2]), wtoi(argv[3]));
 		SetEnvironmentVariableW(L"image", ret.c_str());
