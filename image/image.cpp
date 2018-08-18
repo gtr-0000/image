@@ -858,7 +858,14 @@ void image(const wchar_t *CmdLine)
 
 	if(match(0, L"getmsg"))
 	{
+		wstring		VarName;
 		imageres	*hRes = getres(argv[1]);
+
+		if(argc > 2)
+			VarName = argv[2];
+		else
+			VarName = wstring(argv[1]) + L".wm";
+
 		if(hRes->hwnd != NULL)
 			SendMessageW(hRes->hwnd, WM_GETMSG, (WPARAM) argv[2], 0);
 		else
@@ -1194,9 +1201,19 @@ void image(const wchar_t *CmdLine)
 		resmap[argv[1]].regioninit(argv[1]);
 	}
 
-	if(match(0, L"cmd"))
+	if(match(0, L"tick"))
 	{
-		_wsystem(argv[1]);
+		static int	TickStart = 0;
+		if(argc > 1)
+		{
+			TickStart = GetTickCount() - wtoi(argv[1]);
+		}
+		else
+		{
+			wchar_t ret[15];
+			wsprintfW(ret, L"%d", GetTickCount() - TickStart);
+			SetEnvironmentVariableW(L"image", ret);
+		}
 	}
 
 	if(match(0, L"sound"))

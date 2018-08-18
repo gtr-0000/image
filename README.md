@@ -1,4 +1,4 @@
-###### 关于本文档
+﻿###### 关于本文档
 
 作者: bbaa - Te Studio
 
@@ -82,7 +82,7 @@ image \[argv1 argv2 \... \...
 
 ### 1 buffer/*newBuf*
 
-**语法:buffer &lt;tag&gt; \[width height\] \[r g b\]**
+**用法: buffer &lt;tag&gt; \[width height\] \[r g b\]**
 
     tag 画布名称
 
@@ -94,7 +94,7 @@ image \[argv1 argv2 \... \...
 
 ### 2 load
 
-**语法:load &lt;tag&gt; &lt;file&gt;**
+**用法: load &lt;tag&gt; &lt;file&gt;**
 
     tag 画布标签名称
 
@@ -106,7 +106,7 @@ image \[argv1 argv2 \... \...
 
 ### 3 save
 
-**语法: save &lt;tag&gt; &lt;file&gt;**
+**用法: save &lt;tag&gt; &lt;file&gt;**
 
     tag 画布名称
 
@@ -116,7 +116,7 @@ image \[argv1 argv2 \... \...
 
 ### 4 unload/*delBuf*
 
-**语法:unload &lt;tag&gt;**
+**用法: unload &lt;tag&gt;**
 
     tag 画布名称
 
@@ -124,7 +124,7 @@ image \[argv1 argv2 \... \...
 
 ### 5 info/*size*
 
-**语法: info &lt;tag&gt;**
+**用法: info &lt;tag&gt;**
 
     tag 画布名称
 
@@ -140,7 +140,7 @@ for /f "tokens=1,2" %%X in ("%image%") do echo 宽%%X 高%%Y
 
 ### 6 resize
 
-**语法: resize &lt;tag&gt; &lt;width&gt; &lt;height&gt;**
+**用法: resize &lt;tag&gt; &lt;width&gt; &lt;height&gt;**
 
     tag 画布名称
 
@@ -152,7 +152,7 @@ for /f "tokens=1,2" %%X in ("%image%") do echo 宽%%X 高%%Y
 
 ### 7 target
 
-**语法: target &lt;tag&gt;**
+**用法: target &lt;tag&gt;**
 
     tag 画布名称
 
@@ -161,7 +161,7 @@ for /f "tokens=1,2" %%X in ("%image%") do echo 宽%%X 高%%Y
 
 ### 8 draw
 
-**语法: draw &lt;tag&gt; &lt;x&gt; &lt;y&gt; \[trans \[r g b\] \| alpha &lt;a&gt;\]**
+**用法: draw &lt;tag&gt; &lt;x&gt; &lt;y&gt; \[trans \[r g b\] \| alpha &lt;a&gt;\]**
 
     tag 画布名称
 
@@ -190,7 +190,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 10 setpix
 
-**语法: setpix tag &lt;x&gt; &lt;y&gt; &lt;r&gt; &lt;g&gt; &lt;b&gt;**
+**用法: setpix tag &lt;x&gt; &lt;y&gt; &lt;r&gt; &lt;g&gt; &lt;b&gt;**
 
 作用: 设置当前绘图目标上x,y位置的rgb值
 
@@ -208,7 +208,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 13 line
 
-**用法:line &lt;起点x&gt; &lt;起点y&gt; &lt;终点X&gt; &lt;终点Y&gt;**
+**用法: line &lt;起点x&gt; &lt;起点y&gt; &lt;终点X&gt; &lt;终点Y&gt;**
 
 作用: 画线(颜色用pen命令设置)
 
@@ -226,7 +226,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 16 font
 
-**语法:font \[r\] \[g\] \[b\] \[width\] \[height\] 0 0 \[字体粗细(400)\]
+**用法: font \[r\] \[g\] \[b\] \[width\] \[height\] 0 0 \[字体粗细(400)\]
 \[斜体(0)\] \[下划线(0)\] \[删除线(0)\] \[字体名\]**
 
 作用: 设置当前绘图目标所用字体的rgb值和大小(仅对当前画布有效)
@@ -237,7 +237,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 17 text
 
-**语法:text &lt;string&gt; &lt;x&gt; &lt;y&gt;**
+**用法: text &lt;string&gt; &lt;x&gt; &lt;y&gt;**
 
     string 内容
 
@@ -253,7 +253,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 20 import
 
-**语法: import &lt;tag&gt; &lt;handle&gt;**
+**用法: import &lt;tag&gt; &lt;handle&gt;**
 
     tag 画布名称
 
@@ -263,7 +263,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 21 sleep
 
-**语法: sleep &lt;time&gt;**
+**用法: sleep &lt;time&gt;**
 
     time 毫秒
 
@@ -271,7 +271,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 22 list
 
-**语法:list &lt;file&gt; \[labal\]**
+**用法: list &lt;file&gt; \[labal\]**
 
     label 标签名称
 
@@ -283,7 +283,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 24 union
 
-**语法:union &lt;tag&gt;**
+**用法: union &lt;tag&gt;**
 
 作用: 重置画布tag中的图元
 
@@ -293,7 +293,7 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 ### 26 mouse
 
-**语法:mouse &lt;time&gt; \[region1\] \[region2\] \...**
+**用法: mouse &lt;time&gt; \[region1\] \[region2\] \...**
 
     time 等待时间(毫秒)
 
@@ -313,13 +313,25 @@ region应以如下的形式给出：x1,y1,x2,y2
 
 ### 27 show
 
-**用法:show &lt;tag&gt;**
+**用法: show &lt;tag&gt;**
 
 将画布tag显示在一个窗口，当画布更新时窗口内容也会自动更新
 
-并将窗口事件数据设置到tag.wm(tag为画布名称)
+### 28 hide
 
-Tag.wm的值是一个以空格开头的字符串，以点为参数分割符，当同时有多个事件触发时将会以空格为分割添加第二个事件数据
+**用法: hide &lt;tag&gt;**
+
+隐藏\关闭名为tag的画布的窗口
+
+### 29 getmsg
+
+**用法: getmsg &lt;tag&gt; \[VarName\]**
+
+作用: 获取未获取过的窗口事件数据并设置到\[VarName\](默认为&lt;tag&gt;.wm)
+
+如果画布&lt;tag&gt;没有窗口则设置" Close"到\[VarName\]
+
+\[VarName\]的值是一个以空格开头的字符串，以点为参数分割符，当同时有多个事件触发时将会以空格为分割添加第二个事件数据
 
 事件列表
 
@@ -333,17 +345,28 @@ Tag.wm的值是一个以空格开头的字符串，以点为参数分割符，�
 |MouseMove |事件名.X坐标.Y坐标(相对窗口).图元名称       |MouseMove.2.2.pic1       |鼠标移动       |
 |Close     |无                                          |Close                    |窗口被关闭     |
 
-### 28 hide
-
-**用法:hide &lt;tag&gt;**
-
-隐藏\关闭名为tag的画布的窗口
-
 ### 30 picatom/*picquery*
 
 **用法: picatom &lt;tag&gt; &lt;x&gt; &lt;y&gt;**
 
 获取画布tag 点x y处的图元名称到变量image
+
+### 31 tick
+
+**用法: tick \[NewTime\]
+
+获取计时器的值(单位:毫秒)
+
+或者重设计时器的值(单位:毫秒)
+
+例如:
+
+```
+set image=tick 0
+ping -n 127.1 1
+set image=tick
+echo 经过了 !image! 毫秒
+```
 
 ### 31 cmd
 
