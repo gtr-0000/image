@@ -516,12 +516,12 @@ KeyEvent:
 		{
 			if(('0' <= wParam && wParam <= '9') || ('A' <= wParam && wParam <= 'Z'))
 			{
-				wsprintfW(ret, L" %s.VK_%c.%ud", msgName, wParam, wParam);
+				swprintf(ret, L" %s.VK_%c.%ud", msgName, wParam, wParam);
 			}
 			else
 			{
 				keyName = keymap.count(wParam) ? keymap[wParam] : L"0";
-				wsprintfW(ret, L" %s.%s.%ud", msgName, keyName, wParam);
+				swprintf(ret, L" %s.%s.%ud", msgName, keyName, wParam);
 			}
 			break;
 		}
@@ -558,7 +558,7 @@ KeyEvent:
 MouseEvent:
 		{
 			//似乎mkmap[LOWORD(wParam)]已无用
-			wsprintfW
+			swprintf
 			(
 				ret,
 				L" %s.%d.%d.%s",
@@ -571,11 +571,11 @@ MouseEvent:
 		}
 
 	case WM_MOUSEWHEEL:
-		wsprintfW(ret, L" MouseWheel.%d.%d.%d", (short) HIWORD(wParam), LOWORD(lParam), HIWORD(lParam));
+		swprintf(ret, L" MouseWheel.%d.%d.%d", (short) HIWORD(wParam), LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_MOUSEMOVE:
-		wsprintfW
+		swprintf
 		(
 			ret,
 			L" MouseMove.%d.%d.%s",
@@ -1081,7 +1081,7 @@ void image(const wchar_t *CmdLine)
 		res.regioninit(tag);
 
 		if(resmap.count(tag)) delres(tag);
-		resmap[tag] = res;			//把画布添加到调用表中
+		resmap[tag] = res;	//把画布添加到调用表中
 	}
 
 	if(match(0, L"list"))
@@ -1114,74 +1114,159 @@ void image(const wchar_t *CmdLine)
 	{
 		imageres	*hRes = getres(L"cmd");
 		wchar_t		info[100];
-		POINT		mosPos;
 		int		x = -1, y = -1;
-		int		timer = wtoi(argv[1]);
+		POINT		mosPos;
 
-		// 获取标准输入输出设备句柄
-		HANDLE		hIn = GetStdHandle(STD_INPUT_HANDLE);
-		DWORD		oldConMode;
-		GetConsoleMode(hIn, &oldConMode);	// 备份
-		SetConsoleMode
-		(
-			hIn,
-			(oldConMode | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT) & (~ENABLE_QUICK_EDIT_MODE)
-		);
-
-		INPUT_RECORD	Rec;
-		DWORD		res;
-		DWORD		start = GetTickCount();
-
-		while(timer <= 0 || GetTickCount() - start < timer)
+		if(match(1, L"get"))
 		{
-			DWORD	NCE;
-			GetNumberOfConsoleInputEvents(hIn, &NCE);
-			if(NCE > 0)
-			{
-				ReadConsoleInputW(hIn, &Rec, 1, &res);
-				if(Rec.EventType == MOUSE_EVENT)
-				{
-					if(Rec.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-					{
-						GetCursorPos(&mosPos);
-						ScreenToClient(hCMD, &mosPos);
-						x = min(max((int) scale * mosPos.x, 0), hRes->w);
-						y = min(max((int) scale * mosPos.y, 0), hRes->h);
-						break;
-					}
-				}
-			}
-
-			Sleep(1);
-		}
-
-		if(argc >= 3)
-		{
-			//在指定的region列表中查找
-			int	ret = 0;
-			for(int i = 2; i < argc; i++)
-			{
-				int	x1, y1, x2, y2;
-				swscanf(argv[i], L"%d,%d,%d,%d", &x1, &y1, &x2, &y2);
-				if(x >= x1 && x <= x2 && y >= y1 && y <= y2) ret = i - 1;
-			}
-
-			swprintf(info, L"%d %d %d", x, y, ret);
+			GetCursorPos(&mosPos);
+			ScreenToClient(hCMD, &mosPos);
+			x = min(max((int) scale * mosPos.x, 0), hRes->w);
+			y = min(max((int) scale * mosPos.y, 0), hRes->h);
+			swprintf(info, L"%d %d", x, y);
 			SetEnvironmentVariableW(L"image", info);
-			swprintf(info, L"%d", ret);
-			SetEnvironmentVariableW(L"imagepic", info);
 		}
 		else
 		{
-			//在图元索引表中查找
-			wstring ret;
-			ret = resmap[L"cmd"].regTree.query(x, y);
-			swprintf(info, L"%d %d %s", x, y, ret.c_str());
-			SetEnvironmentVariableW(L"image", info);
-			SetEnvironmentVariableW(L"imagepic", ret.c_str());
-		}
+			int	timer = wtoi(argv[1]);
 
-		SetConsoleMode(hIn, oldConMode);
+			// 获取标准输入输出设备句柄
+			HANDLE	hIn = GetStdHandle(STD_INPUT_HANDLE);
+			DWORD	oldConMode;
+			GetConsoleMode(hIn, &oldConMode);	// 备份
+			SetConsoleMode
+			(
+				hIn,
+				(oldConMode | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT) &
+					(~ENABLE_QUICK_EDIT_MODE)
+			);
+
+			INPUT_RECORD	Rec;
+			DWORD		res;
+			DWORD		start = GetTickCount();
+
+			while(timer <= 0 || GetTickCount() - start < timer)
+			{
+				DWORD	NCE;
+				GetNumberOfConsoleInputEvents(hIn, &NCE);
+				if(NCE > 0)
+				{
+					ReadConsoleInputW(hIn, &Rec, 1, &res);
+					if(Rec.EventType == MOUSE_EVENT)
+					{
+						if(Rec.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+						{
+							GetCursorPos(&mosPos);
+							ScreenToClient(hCMD, &mosPos);
+							x = min(max((int) scale * mosPos.x, 0), hRes->w);
+							y = min(max((int) scale * mosPos.y, 0), hRes->h);
+							break;
+						}
+					}
+				}
+
+				Sleep(1);
+			}
+
+			if(argc >= 3)
+			{
+				//在指定的region列表中查找
+				int	ret = 0;
+				for(int i = 2; i < argc; i++)
+				{
+					int	x1, y1, x2, y2;
+					swscanf(argv[i], L"%d,%d,%d,%d", &x1, &y1, &x2, &y2);
+					if(x >= x1 && x <= x2 && y >= y1 && y <= y2) ret = i - 1;
+				}
+
+				swprintf(info, L"%d %d %d", x, y, ret);
+				SetEnvironmentVariableW(L"image", info);
+				swprintf(info, L"%d", ret);
+				SetEnvironmentVariableW(L"imagepic", info);
+			}
+			else
+			{
+				//在图元索引表中查找
+				wstring ret;
+				ret = resmap[L"cmd"].regTree.query(x, y);
+				swprintf(info, L"%d %d %s", x, y, ret.c_str());
+				SetEnvironmentVariableW(L"image", info);
+				SetEnvironmentVariableW(L"imagepic", ret.c_str());
+			}
+
+			SetConsoleMode(hIn, oldConMode);
+		}
+	}
+
+	if(match(0, L"key"))
+	{
+		wchar_t info[10000] = L" ";
+		if(match(1, L"check"))
+		{
+			SetEnvironmentVariableW
+			(
+				L"image",
+				(GetAsyncKeyState(wtoi(argv[2])) & 0x8000) != 0 ? L"1" : L"0"
+			);
+		}
+		else if(match(1, L"list"))
+		{
+			char	i;
+			for(i = 0; i < 255; i++)
+				if((GetAsyncKeyState(i) & 0x8000) != 0) swprintf(info, L"%s %d", info, i);
+			SetEnvironmentVariableW(L"image", info);
+		}
+		else
+		{
+			int	timer = wtoi(argv[1]);
+			int	key = -1;
+
+			// 获取标准输入输出设备句柄
+			HANDLE	hIn = GetStdHandle(STD_INPUT_HANDLE);
+			DWORD	oldConMode;
+			GetConsoleMode(hIn, &oldConMode);	// 备份
+			SetConsoleMode
+			(
+				hIn,
+				(oldConMode | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT) &
+					(~ENABLE_QUICK_EDIT_MODE)
+			);
+
+			INPUT_RECORD	Rec;
+			DWORD		res;
+			DWORD		start = GetTickCount();
+
+			while(timer <= 0 || GetTickCount() - start < timer)
+			{
+				DWORD	NCE;
+				GetNumberOfConsoleInputEvents(hIn, &NCE);
+				if(NCE > 0)
+				{
+					ReadConsoleInputW(hIn, &Rec, 1, &res);
+					if(Rec.EventType == KEY_EVENT)
+					{
+						if(Rec.Event.KeyEvent.bKeyDown)
+						{
+							for(int i = 2; i < argc; i++)
+							{
+								if(wtoi(argv[i]) == Rec.Event.KeyEvent.wVirtualKeyCode)
+								{
+									swprintf(info, L"%d", i - 1);
+									SetEnvironmentVariableW(L"image", info);
+									goto Key_OK;
+								}
+							}
+						}
+					}
+
+					Sleep(1);
+				}
+
+				SetEnvironmentVariableW(L"image", L"-1");
+Key_OK:
+				SetConsoleMode(hIn, oldConMode);
+			}
+		}
 	}
 
 	if(match(0, L"picatom"))
@@ -1211,7 +1296,7 @@ void image(const wchar_t *CmdLine)
 		else
 		{
 			wchar_t ret[15];
-			wsprintfW(ret, L"%d", GetTickCount() - TickStart);
+			swprintf(ret, L"%d", GetTickCount() - TickStart);
 			SetEnvironmentVariableW(L"image", ret);
 		}
 	}
