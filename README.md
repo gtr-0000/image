@@ -25,11 +25,9 @@ image3模块核心
 
 [https://github.com/Byaidu/image](https://github.com/Byaidu/image/)
 
-\\
+|
 
- \\
-
-  \\____[https://github.com/gtr-0000/image](https://github.com/gtr-0000/image/)
+|____[https://github.com/gtr-0000/image](https://github.com/gtr-0000/image/)
 
 
 # 基本教程
