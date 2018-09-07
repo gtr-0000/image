@@ -1211,9 +1211,9 @@ void image(const wchar_t *CmdLine)
 		}
 		else if(match(1, L"list"))
 		{
-			char	i;
+			int	i;
 			for(i = 0; i < 255; i++)
-				if((GetAsyncKeyState(i) & 0x8000) != 0) swprintf(info, L"%s %d", info, i);
+				if((GetAsyncKeyState(i) & 0x8000) != 0) swprintf(info, L"%s%d ", info, i);
 			SetEnvironmentVariableW(L"image", info);
 		}
 		else
@@ -1247,13 +1247,31 @@ void image(const wchar_t *CmdLine)
 					{
 						if(Rec.Event.KeyEvent.bKeyDown)
 						{
-							for(int i = 2; i < argc; i++)
+							if(argc <= 2)
 							{
-								if(wtoi(argv[i]) == Rec.Event.KeyEvent.wVirtualKeyCode)
+								swprintf
+								(
+									info,
+									L"%d",
+									Rec.Event.KeyEvent.wVirtualKeyCode
+								);
+								SetEnvironmentVariableW(L"image", info);
+								goto Key_OK;
+							}
+							else
+							{
+								for(int i = 2; i < argc; i++)
 								{
-									swprintf(info, L"%d", i - 1);
-									SetEnvironmentVariableW(L"image", info);
-									goto Key_OK;
+									if
+									(
+									wtoi(argv[i]) == Rec.Event.KeyEvent.
+											wVirtualKeyCode
+									)
+									{
+										swprintf(info, L"%d", i - 1);
+										SetEnvironmentVariableW(L"image", info);
+										goto Key_OK;
+									}
 								}
 							}
 						}
@@ -1261,11 +1279,11 @@ void image(const wchar_t *CmdLine)
 
 					Sleep(1);
 				}
-
-				SetEnvironmentVariableW(L"image", L"-1");
-Key_OK:
-				SetConsoleMode(hIn, oldConMode);
 			}
+
+			SetEnvironmentVariableW(L"image", L"-1");
+Key_OK:
+			SetConsoleMode(hIn, oldConMode);
 		}
 	}
 
