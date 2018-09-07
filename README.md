@@ -10,7 +10,9 @@ gtr-0000 (github.com)
 --------
 
 ### cmd.exe
-修改版CMD用于加载Image.dll
+修改版CMD用于启动系统cmd并加载Image.dll[x64支持]
+
+见[https://github.com/gtr-0000/init](https://github.com/gtr-0000/init/)
 
 ### init.dll
 加载同目录下的所有dll
@@ -22,6 +24,13 @@ image3模块核心
 --------
 
 [https://github.com/Byaidu/image](https://github.com/Byaidu/image/)
+
+\\
+
+ \\
+
+  \\____[https://github.com/gtr-0000/image](https://github.com/gtr-0000/image/)
+
 
 # 基本教程
 --------
@@ -198,13 +207,21 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 **用法: pen &lt;R&gt; &lt;G&gt; &lt;B&gt; &lt;WIDTH&gt;**
 
+**用法: pen -1**
+
 作用: 设置绘制边线颜色和粗细(仅对当前画布有效)
+
+-1表示不绘制边线
 
 ### 12 brush
 
 **用法: brush &lt;R&gt; &lt;G&gt; &lt;B&gt;**
 
-作用: 设置绘制背景颜色(仅对当前画布有效)
+**用法: brush -1**
+
+作用: 设置绘制内部颜色(仅对当前画布有效)
+
+-1表示不绘制内部
 
 ### 13 line
 
@@ -295,35 +312,67 @@ for /f "tokens=1,2,3" %%X in ("%image%") do echo R=%%X G=%%Y B=%%Z
 
 **用法: mouse &lt;time&gt; \[region1\] \[region2\] \...**
 
+**用法: mouse get**
+
     time 等待时间(毫秒)
 
 作用:  
 
 捕获鼠标坐标及事件，坐标以像素为单位，时间以毫秒为单位
 
+若用`mouse get'则会直接返回鼠标坐标
+
 若time&lt;0, 不设置时间限制
 
 当发生点击事件时会将鼠标坐标x,y以及坐标在画布cmd上所在图元tag的tag存储到变量image, 并将图元tag的tag单独再存储到变量imagepic
 
-若时间超过限制, image会返回"TimeOut"
+若时间超过限制, image会返回"-1 -1"
 
 若指定了region，那么返回的的就不是图元tag的tag而是region的序号，如果鼠标坐标不在任何一个指定的region中，则返回序号0
 
 region应以如下的形式给出：x1,y1,x2,y2
 
-### 27 show
+### 27 key
+
+**用法: key &lt;time&gt; \[keycode1\] \[keycode2\] \...**
+
+**用法: key check <keycode>**
+
+**用法: key list**
+
+    time 等待时间(毫秒)
+
+作用:  
+
+捕获键盘按键，类似choice
+
+key list列举当前按下的按键的虚拟键码列表
+
+key check获得虚拟键码为<keycode>的按键是否被按下
+
+其他情况
+
+若time&lt;0, 不设置时间限制
+
+当键盘按钮按下时会把按下按键的keycode保存到变量image
+
+若指定了keycode1, keycode2 \...，那么返回的的就是keycode的序号，类似choice
+
+若时间超过限制, image会返回"-1"
+
+### 28 show
 
 **用法: show &lt;tag&gt;**
 
 将画布tag显示在一个窗口，当画布更新时窗口内容也会自动更新
 
-### 28 hide
+### 29 hide
 
 **用法: hide &lt;tag&gt;**
 
 隐藏\关闭名为tag的画布的窗口
 
-### 29 getmsg
+### 30 getmsg
 
 **用法: getmsg &lt;tag&gt; \[VarName\]**
 
@@ -345,13 +394,13 @@ region应以如下的形式给出：x1,y1,x2,y2
 |MouseMove |事件名.X坐标.Y坐标(相对窗口).图元名称       |MouseMove.2.2.pic1       |鼠标移动       |
 |Close     |无                                          |Close                    |窗口被关闭     |
 
-### 30 picatom/*picquery*
+### 31 picatom/*picquery*
 
 **用法: picatom &lt;tag&gt; &lt;x&gt; &lt;y&gt;**
 
 获取画布tag 点x y处的图元名称到变量image
 
-### 31 tick
+### 32 tick
 
 **用法: tick \[NewTime\]
 
@@ -368,11 +417,11 @@ set image=tick
 echo 经过了 !image! 毫秒
 ```
 
-### 31 cmd
+### 33 cmd
 
 *此命令不支持. 请直接操作命令行.*
 
-### 32 thread
+### 34 thread
 
 *此命令不支持. 请使用start /b "" "&lt;file&gt;".*
 
