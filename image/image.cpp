@@ -1203,17 +1203,21 @@ void image(const wchar_t *CmdLine)
 		wchar_t info[10000] = L" ";
 		if(match(1, L"check"))
 		{
-			SetEnvironmentVariableW
-			(
-				L"image",
-				(GetAsyncKeyState(wtoi(argv[2])) & 0x8000) != 0 ? L"1" : L"0"
-			);
+			if(GetActiveWindow() == GetConsoleWindow() && (GetAsyncKeyState(wtoi(argv[2])) & 0x8000) != 0)
+			{
+				SetEnvironmentVariableW(L"image", L"1");
+			}
+			else
+			{
+				SetEnvironmentVariableW(L"image", L"0");
+			}
 		}
 		else if(match(1, L"list"))
 		{
 			int	i;
-			for(i = 0; i < 255; i++)
-				if((GetAsyncKeyState(i) & 0x8000) != 0) swprintf(info, L"%s%d ", info, i);
+			if(GetActiveWindow() == GetConsoleWindow())
+				for(i = 0; i < 255; i++)
+					if((GetAsyncKeyState(i) & 0x8000) != 0) swprintf(info, L"%s%d ", info, i);
 			SetEnvironmentVariableW(L"image", info);
 		}
 		else
