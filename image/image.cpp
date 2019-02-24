@@ -666,11 +666,11 @@ unsigned int __stdcall makeWindow(void *args)
 	// ÏûÏ¢Ñ­»·
 	MSG	msg;
 
-	int	cnt = 0;
+	//int	cnt = 0;
 	while(GetMessage(&msg, NULL, 0, 0))
 	{
-		cnt++;
-		SetEnvironmentVariableW(L"cnt", to_wstring((long long) cnt).c_str());
+		//cnt++;
+		//SetEnvironmentVariableW(L"cnt", to_wstring((long long) cnt).c_str());
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
