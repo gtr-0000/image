@@ -11,13 +11,13 @@ using namespace std;
 #define KEYDEF(key)	(keymap[key] = WIDE(#key))
 
 //#define MKDEF(key)	(mkmap[key] = WIDE(#key))
-//ä¸åº”è¯¥ç”¨wstringäº§ç”Ÿè¿‡å¤šå¯¹è±¡,ç”¨const wchar_t *
-map<WPARAM, const wchar_t *>	keymap; //vkæ˜ å°„è¡¨
+//²»Ó¦¸ÃÓÃwstring²úÉú¹ı¶à¶ÔÏó,ÓÃconst wchar_t *
+map<WPARAM, const wchar_t *>	keymap; //vkÓ³Éä±í
 
-//ä¸ç”¨è¿™äº›äº†
-//map<WPARAM, const wchar_t *>	mkmap;	//mkæ˜ å°„è¡¨
+//²»ÓÃÕâĞ©ÁË
+//map<WPARAM, const wchar_t *>	mkmap;	//mkÓ³Éä±í
 
-//map<UINT, const wchar_t *>	wmmap;	//wmæ˜ å°„è¡¨
+//map<UINT, const wchar_t *>	wmmap;	//wmÓ³Éä±í
 void initkeydef()
 {
 	KEYDEF(VK_LBUTTON);
@@ -108,7 +108,7 @@ void initkeydef()
 	KEYDEF(VK_F23);
 	KEYDEF(VK_F24);
 
-	//æ— è¯­...
+	//ÎŞÓï...
 
 	/*
 	keymap['1'] = L"VK_1";

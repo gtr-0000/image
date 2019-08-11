@@ -626,7 +626,7 @@ unsigned int __stdcall makeWindow(void *args)
 	Draw.style = CS_HREDRAW | CS_VREDRAW;
 	Draw.hbrBackground = (HBRUSH) COLOR_WINDOW;
 	Draw.lpfnWndProc = WindowProc;
-	Draw.lpszClassName = "imagewindow";
+	Draw.lpszClassName = (LPCSTR)L"imagewindow";
 	Draw.hInstance = hInstance;
 	RegisterClass(&Draw);
 
@@ -962,8 +962,14 @@ void image(const wchar_t *CmdLine)
 	if(match(0, L"text"))
 	{
 		//显示两次才会刷新出来，大概是个bug
-		for(int i = 0; i < 2; i++)
-			TextOutW(hTarget->hdc, wtoi(argv[2]), wtoi(argv[3]), argv[1], wcslen(argv[1]));
+		//gt:开什么玩笑吗
+		//for(int i = 0; i < 2; i++)
+		TextOutW(hTarget->hdc, wtoi(argv[2]), wtoi(argv[3]), argv[1], wcslen(argv[1]));
+		if(hTarget->type == irCMD) {
+			//壮哉! ReleaseDC
+			ReleaseDC(hTarget->hwnd,hTarget->hdc);
+			hTarget->hdc = GetDC(hTarget->hwnd);
+		}
 	}
 
 	//画图类
