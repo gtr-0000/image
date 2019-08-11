@@ -334,7 +334,7 @@ region应以如下的形式给出：x1,y1,x2,y2
 
 **用法: key &lt;time&gt; \[keycode1\] \[keycode2\] \...**
 
-**用法: key check <keycode>**
+**用法: key check &lt;keycode&gt;**
 
 **用法: key list**
 
@@ -346,7 +346,7 @@ region应以如下的形式给出：x1,y1,x2,y2
 
 key list列举当前按下的按键的虚拟键码列表
 
-key check获得虚拟键码为<keycode>的按键是否被按下
+key check获得虚拟键码为&lt;keycode&gt;的按键是否被按下
 
 其他情况
 
@@ -360,9 +360,13 @@ key check获得虚拟键码为<keycode>的按键是否被按下
 
 ### 28 show
 
-**用法: show &lt;tag&gt;**
+**用法: show &lt;tag&gt; [/T &lt;title&gt;] [/I &lt;icon&gt;]**
 
 将画布tag显示在一个窗口，当画布更新时窗口内容也会自动更新
+
+title 窗口标题(可选)
+
+icon 窗口图标
 
 ### 29 hide
 

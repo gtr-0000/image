@@ -53,6 +53,12 @@ struct wndInfo		//窗口信息结构体
 	HDC		hdc;
 };
 
+struct makeWindowArgs {	// 给makeWindow()传递的参数
+	wchar_t*	tag;
+	wchar_t*	title;
+	wchar_t*	icon;
+};
+
 map<wstring, imageres>	resmap;			//画布映射表
 map<HWND, wndInfo>	wndmap;			//窗口信息映射表
 HWND			hCMD;			//控制台窗口句柄
@@ -286,7 +292,8 @@ void Init_image()
 	resmap[L"desktop"] = res;	//把desktop添加到画布映射表中
 
 	//第一次使用TextOutA无效，大概是个bug
-	TextOutA(hTarget->hdc, 0, 0, 0, 0);
+	//不需要
+	//TextOutA(hTarget->hdc, 0, 0, 0, 0);
 	return;
 }
 
@@ -607,17 +614,21 @@ MouseEvent:
 	return 0;
 }
 
-//别问我为什么是 void *
+//args 是 void *
 //看image() -> L"show"
+//和struct makeWindowArgs
 
 //注意args必须由new wstring得到,因为有delete
-unsigned int __stdcall makeWindow(void *args)
+unsigned int __stdcall makeWindow(void *vargs)
 {
-	wstring		&tag = *(wstring *) args;
+	makeWindowArgs	&args = *(makeWindowArgs *) vargs;
+
+	wprintf(L"%s,%s,%s",args.tag,args.title,args.icon);
+	wstring		&tag = wstring(args.tag);
 
 	HINSTANCE	hInstance = GetModuleHandle(NULL);
 
-	WNDCLASS	Draw;
+	WNDCLASSA	Draw;
 	Draw.cbClsExtra = 0;
 	Draw.cbWndExtra = 0;
 	Draw.hCursor = LoadCursor(hInstance, IDC_ARROW);
@@ -626,9 +637,9 @@ unsigned int __stdcall makeWindow(void *args)
 	Draw.style = CS_HREDRAW | CS_VREDRAW;
 	Draw.hbrBackground = (HBRUSH) COLOR_WINDOW;
 	Draw.lpfnWndProc = WindowProc;
-	Draw.lpszClassName = (LPCSTR)L"imagewindow";
+	Draw.lpszClassName = "imagewindow";
 	Draw.hInstance = hInstance;
-	RegisterClass(&Draw);
+	RegisterClassA(&Draw);
 
 	imageres	*hRes = getres(tag.c_str());
 	RECT		rc = { 0, 0, hRes->w, hRes->h };
@@ -637,7 +648,7 @@ unsigned int __stdcall makeWindow(void *args)
 	HWND	hwnd = CreateWindowW
 		(
 			L"imagewindow", //上面注册的类名，要完全一致
-			tag.c_str(),	//窗口标题文字
+			args.title == NULL ? tag.c_str() : args.title,	//窗口标题文字
 			WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME,	//窗口外观样式
 			CW_USEDEFAULT,			//窗口相对于父级的X坐标
 			CW_USEDEFAULT,			//窗口相对于父级的Y坐标
@@ -663,6 +674,13 @@ unsigned int __stdcall makeWindow(void *args)
 	// 更新窗口
 	UpdateWindow(hwnd);
 
+	if(args.icon != NULL){
+		HICON icon = (HICON)LoadImageW(NULL, args.icon, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+		if(icon != NULL){
+			SendMessage(hwnd,WM_SETICON,ICON_BIG,(LPARAM)icon);
+		}
+	}
+
 	// 消息循环
 	MSG	msg;
 
@@ -680,7 +698,7 @@ unsigned int __stdcall makeWindow(void *args)
 	wndmap.erase(hwnd);
 	hRes->hwnd = NULL;
 
-	delete args;
+	delete vargs;
 	return 0;
 }
 
@@ -842,7 +860,22 @@ void image(const wchar_t *CmdLine)
 		if(hRes->type == irCMD) ShowWindow(hRes->hwnd, SW_SHOW);
 		if(hRes->type == irBuffer && hRes->hwnd == NULL)
 		{
-			wstring *arg = new wstring(argv[1]);
+			makeWindowArgs *arg = new makeWindowArgs;
+			arg->tag = (wchar_t*) malloc((wcslen(argv[1]) + 1) * sizeof(wchar_t));
+			wcscpy(arg->tag, argv[1]);
+			arg->title = NULL;
+			arg->icon = NULL;
+			for(int i = 2; i < argc; i++){
+				if(match(i, L"/T") && i + 1 < argc){
+					i++;
+					arg->title = (wchar_t*) malloc((wcslen(argv[i]) + 1) * sizeof(wchar_t));
+					wcscpy(arg->title, argv[i]);
+				} else if(match(i, L"/I") && i + 1 < argc){
+					i++;
+					arg->icon = (wchar_t*) malloc((wcslen(argv[i]) + 1) * sizeof(wchar_t));
+					wcscpy(arg->icon, argv[i]);
+				}
+			}
 
 			//因为vs2010,不能thread,只能这样_beginthreadex,只能传个指针
 			_beginthreadex(NULL, 0, makeWindow, arg, 0, NULL);

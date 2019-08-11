@@ -9,7 +9,7 @@ set image=load bg window.png
 set image=[cmd] draw bg 0 0
 set image=[box] draw bg 0 0
 pause
-set image=show box
+set image=show box /T testing /I FreeArc.ico
 pause
 set image=[box] draw bg 100 100 alpha 64
 pause
