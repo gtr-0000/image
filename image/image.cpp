@@ -623,7 +623,6 @@ unsigned int __stdcall makeWindow(void *vargs)
 {
 	makeWindowArgs	&args = *(makeWindowArgs *) vargs;
 
-	wprintf(L"%s,%s,%s",args.tag,args.title,args.icon);
 	wstring		&tag = wstring(args.tag);
 
 	HINSTANCE	hInstance = GetModuleHandle(NULL);
